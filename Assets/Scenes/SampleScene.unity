@@ -352,7 +352,6 @@ GameObject:
   - component: {fileID: 1374269621}
   - component: {fileID: 1374269620}
   - component: {fileID: 1374269622}
-  - component: {fileID: 1374269623}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -436,24 +435,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1374269619}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6a234a43c6465c4cabb772ea99607fa, type: 3}
+  m_Script: {fileID: 11500000, guid: 0c077d7469d4fe449b5df9199ae57a79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data:
-    speed: 10
-    health: 7
---- !u!114 &1374269623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1374269619}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52b4e46d2aec82d4db67e2f2c2eb8701, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  speed: 10
 --- !u!1 &1645885629
 GameObject:
   m_ObjectHideFlags: 0
@@ -484,9 +469,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6a234a43c6465c4cabb772ea99607fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data:
-    speed: 10
-    health: 5
+  speed: 10
+  health: 5
 --- !u!4 &1645885631
 Transform:
   m_ObjectHideFlags: 0
