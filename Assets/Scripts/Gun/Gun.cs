@@ -2,22 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Gun : MonoBehaviour,IInput
+public class Gun : MonoBehaviour,IUpdatable
 {
     public GameObject Bullet;
 
-    public void GetInput()
+    private void OnEnable()
     {
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
+        UpdateManager.Instance?.Register(this);
+    }
 
+    private void OnDisable()
+    {
+        UpdateManager.Instance?.Unregister(this);
+    }
+
+    public void OnUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Shooting();
         }
     }
 
     public void Shooting()
     {
-        
-            Instantiate(Bullet); //오브젝트 풀링할 예정
-        
+        Debug.Log("발사");
+
+        ObjectPoolManager.Instance.SpawnFromPool(Bullet.name,this.gameObject);
+
     }
+
 }

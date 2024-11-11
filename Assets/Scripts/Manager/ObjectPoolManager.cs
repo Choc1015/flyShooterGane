@@ -30,7 +30,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             for (int i = 0; i < pool.size; i++) 
             {
                 GameObject obj = Instantiate(pool.prefab); // 풀링된 오브젝트 생성
-                obj.transform.SetParent(fileObject.transform); // 생성해서 폴더(빈옵젝) 안에 저장 
+                obj.transform.SetParent(fileObject.transform); // 생성해서 폴더(빈옵젝) 안에 저장
                 obj.SetActive(false); // 비활성화 시켜놓기
                 objectPool.Enqueue(obj); // 큐에 데이터 저장
             }
@@ -40,7 +40,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
     }
 
-    public GameObject SpawnFromPool(string tag) // 비활성화로 풀링된 오브젝트 활성화, 이름을 받아서 실행
+    public GameObject SpawnFromPool(string tag, GameObject spawnPoint) // 비활성화로 풀링된 오브젝트 활성화, 이름을 받아서 실행
     {
         if (!poolDictionary.ContainsKey(tag)) // 이름이 딕셔너리에 없으면 오류 구문 실행
         {
@@ -53,6 +53,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         }
         GameObject objectToSpawn = poolDictionary[tag].Dequeue(); // 앞에서 널 체크 이후 있기에 큐에서 꺼내 쓰기
         objectToSpawn.SetActive(true); // 꺼내고 활성화
+        objectToSpawn.transform.position = spawnPoint.transform.position;
         poolDictionary[tag].Enqueue(objectToSpawn); // 활성화후 정보를 다시 큐에 저장
 
         return objectToSpawn; // 그리고 그 옵젝을 리턴
