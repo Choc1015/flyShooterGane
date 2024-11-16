@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Gun : MonoBehaviour,IUpdatable
 {
-    public GameObject Bullet;
+    public GameObject BulletPrefab;
 
     private void OnEnable()
     {
@@ -28,8 +28,9 @@ public class Gun : MonoBehaviour,IUpdatable
     {
         Debug.Log("น฿ป็");
 
-        ObjectPoolManager.Instance.SpawnFromPool(Bullet.name,this.gameObject);
-
+        
+        GameObject bullet = ObjectPoolManager.Instance.SpawnFromPool(BulletPrefab.name, gameObject);
+        bullet.transform.rotation = transform.rotation;
     }
 
 }

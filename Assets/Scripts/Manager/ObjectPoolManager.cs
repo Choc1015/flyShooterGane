@@ -6,7 +6,6 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     [System.Serializable] // 클래스를 직렬화 시키는 법, 이전 정보를 저장해줌
     public class Pool // 풀링할 오브젝트
     {
-        public string tag; // 태그 저장
         public GameObject prefab; // 풀링할 오브젝트
         public int size; // 어느정도 풀링할 건지
     }
@@ -26,16 +25,17 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         foreach (Pool pool in pools) // 많은 풀링 돌리기
         {
             Queue<GameObject> objectPool = new Queue<GameObject>(); // 큐 객체 생성
-            GameObject fileObject = new GameObject("@" + pool.tag); // 풀링된 오브젝트를 깔끔하게 보이게 하기 위해 빈오브젝트에서 관리
+            GameObject fileObject = new GameObject("@" + pool.prefab.name); // 풀링된 오브젝트를 깔끔하게 보이게 하기 위해 빈오브젝트에서 관리
             for (int i = 0; i < pool.size; i++) 
             {
                 GameObject obj = Instantiate(pool.prefab); // 풀링된 오브젝트 생성
+                obj.name = pool.prefab.name;
                 obj.transform.SetParent(fileObject.transform); // 생성해서 폴더(빈옵젝) 안에 저장
                 obj.SetActive(false); // 비활성화 시켜놓기
                 objectPool.Enqueue(obj); // 큐에 데이터 저장
             }
 
-            poolDictionary.Add(pool.tag, objectPool); // 태그와 옵젝을 딕셔너리에 저장
+            poolDictionary.Add(pool.prefab.name, objectPool); // 태그와 옵젝을 딕셔너리에 저장
 
         }
     }
@@ -47,7 +47,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
             return null;
         }
-        if (poolDictionary[tag] == null) // 이름은 있는데 안에 풀링 오브젝트가 없을시 리턴ㅋ
+        if (poolDictionary[tag] == null) // 이름은 있는데 안에 풀링 오브젝트가 없을시 리턴
         {
             return null;
         }
@@ -58,4 +58,12 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
         return objectToSpawn; // 그리고 그 옵젝을 리턴
     }
+
+    //public void DeSpawnToPool()
+    //{
+
+    //}
+
+
+
 }
