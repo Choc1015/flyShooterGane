@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class StraightBullet : Bullet
 {
-    private void Start()
+    private new void OnEnable()
     {
+        base.OnEnable();
         StartCoroutine(BombBullet());
     }
 

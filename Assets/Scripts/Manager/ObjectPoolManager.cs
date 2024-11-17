@@ -52,6 +52,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             return null;
         }
         GameObject objectToSpawn = poolDictionary[tag].Dequeue(); // 앞에서 널 체크 이후 있기에 큐에서 꺼내 쓰기
+        objectToSpawn.SetActive(false); // 꺼내고 활성화
         objectToSpawn.SetActive(true); // 꺼내고 활성화
         objectToSpawn.transform.position = spawnPoint.transform.position;
         poolDictionary[tag].Enqueue(objectToSpawn); // 활성화후 정보를 다시 큐에 저장

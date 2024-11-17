@@ -457,7 +457,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pools:
   - prefab: {fileID: 3808332709774872981, guid: 94ea91855f2eca949b53dd1c99685f5f, type: 3}
-    size: 100
+    size: 10
 --- !u!1001 &997553248
 PrefabInstance:
   m_ObjectHideFlags: 0

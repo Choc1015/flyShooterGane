@@ -1,68 +1,44 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UpdateManager : Singleton<UpdateManager>
 {
-    private List<IUpdatable> updatableObjects = new List<IUpdatable>();
-    private List<IFixedUpdatable> fixedUpdatableObjects = new List<IFixedUpdatable>();
+    // Update와 FixedUpdate를 위한 이벤트 정의
+    public event System.Action OnUpdateEvent;
+    public event System.Action OnFixedUpdateEvent;
 
-    // 매 프레임마다 모든 IUpdatable 객체의 OnUpdate 메서드를 호출
+    // 매 프레임마다 Update 이벤트 호출
     void Update()
     {
-        foreach (var updatable in updatableObjects)
-        {
-            if (updatable == null)
-                continue;
-
-            updatable.OnUpdate();
-        }
+        OnUpdateEvent?.Invoke();
     }
 
-    // 물리 프레임마다 모든 IFixedUpdatable 객체의 OnFixedUpdate 메서드를 호출
+    // 물리 프레임마다 FixedUpdate 이벤트 호출
     void FixedUpdate()
     {
-        foreach (var fixedUpdatable in fixedUpdatableObjects)
-        {
-            if (fixedUpdatable == null)
-                continue;
-
-            fixedUpdatable.OnFixedUpdate();
-        }
+        OnFixedUpdateEvent?.Invoke();
     }
 
-    // Update를 등록하는 메서드
+    // Update 등록 메서드
     public void Register(IUpdatable updatable)
     {
-        if (!updatableObjects.Contains(updatable))
-        {
-            updatableObjects.Add(updatable);
-        }
+        OnUpdateEvent += updatable.OnUpdate;
     }
 
-    // Update를 등록 해제하는 메서드
+    // Update 등록 해제 메서드
     public void Unregister(IUpdatable updatable)
     {
-        if (updatableObjects.Contains(updatable))
-        {
-            updatableObjects.Remove(updatable);
-        }
+        OnUpdateEvent -= updatable.OnUpdate;
     }
 
-    // FixedUpdate를 등록하는 메서드
+    // FixedUpdate 등록 메서드
     public void Register(IFixedUpdatable fixedUpdatable)
     {
-        if (!fixedUpdatableObjects.Contains(fixedUpdatable))
-        {
-            fixedUpdatableObjects.Add(fixedUpdatable);
-        }
+        OnFixedUpdateEvent += fixedUpdatable.OnFixedUpdate;
     }
 
-    // FixedUpdate를 등록 해제하는 메서드
+    // FixedUpdate 등록 해제 메서드
     public void Unregister(IFixedUpdatable fixedUpdatable)
     {
-        if (fixedUpdatableObjects.Contains(fixedUpdatable))
-        {
-            fixedUpdatableObjects.Remove(fixedUpdatable);
-        }
+        OnFixedUpdateEvent -= fixedUpdatable.OnFixedUpdate;
     }
 }
