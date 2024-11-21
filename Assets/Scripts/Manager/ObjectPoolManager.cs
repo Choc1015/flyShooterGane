@@ -3,68 +3,104 @@ using UnityEngine;
 
 public class ObjectPoolManager : Singleton<ObjectPoolManager>
 {
-    [System.Serializable] // 클래스를 직렬화 시키는 법, 이전 정보를 저장해줌
-    public class Pool // 풀링할 오브젝트
+    [System.Serializable]
+    public class Pool // 풀은 프리팹과 풀링될 사이즈를 가지고 있다.
     {
-        public GameObject prefab; // 풀링할 오브젝트
-        public int size; // 어느정도 풀링할 건지
+        public GameObject prefab;
+        public int size;
     }
 
-    public List<Pool> pools; // 풀링할 객체들
-    public Dictionary<string, Queue<GameObject>> poolDictionary; // 풀링 딕셔너리로 이름에 따라 풀링 딕셔러니에 보관
+    public List<Pool> pools; // 리스트에 여러 풀들을 관리한다. 
+    public Dictionary<string, Queue<GameObject>> poolDictionary; // 풀을 딕셔너리에서 생성한다. 
 
     private void Awake()
     {
-        Initialize(); // 초기 값
+        Initialize();
     }
 
+    /// <summary>
+    /// 여러 Pool들을 돌면서 하나의 Pool을 큐리스트로 만들고 게임 오브젝트 생성
+    /// 그리고 풀 사이즈 만큼 오브젝트 생성하여 큐안에 저장 
+    /// 그리고 그 큐를 딕셔너리에 저장
+    /// </summary>
     private void Initialize()
     {
-        poolDictionary = new Dictionary<string, Queue<GameObject>>(); // 객체 생성
+        poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
-        foreach (Pool pool in pools) // 많은 풀링 돌리기
+        foreach (Pool pool in pools)
         {
-            Queue<GameObject> objectPool = new Queue<GameObject>(); // 큐 객체 생성
-            GameObject fileObject = new GameObject("@" + pool.prefab.name); // 풀링된 오브젝트를 깔끔하게 보이게 하기 위해 빈오브젝트에서 관리
-            for (int i = 0; i < pool.size; i++) 
+            Queue<GameObject> objectPool = new Queue<GameObject>();
+            GameObject parentObject = new GameObject("@" + pool.prefab.name);
+
+            for (int i = 0; i < pool.size; i++)
             {
-                GameObject obj = Instantiate(pool.prefab); // 풀링된 오브젝트 생성
-                obj.name = pool.prefab.name;
-                obj.transform.SetParent(fileObject.transform); // 생성해서 폴더(빈옵젝) 안에 저장
-                obj.SetActive(false); // 비활성화 시켜놓기
-                objectPool.Enqueue(obj); // 큐에 데이터 저장
+                objectPool.Enqueue(CreateNewObject(pool, parentObject.transform));
             }
 
-            poolDictionary.Add(pool.prefab.name, objectPool); // 태그와 옵젝을 딕셔너리에 저장
-
+            poolDictionary.Add(pool.prefab.name, objectPool);
         }
     }
 
-    public GameObject SpawnFromPool(string tag, GameObject spawnPoint) // 비활성화로 풀링된 오브젝트 활성화, 이름을 받아서 실행
+    /// <summary>
+    /// 오브젝트 생성 함수 풀과 부모 오브젝트를 받아서 부모 오브젝트는 그냥 빈 폴더이고 생성해서 부모 오브젝에 정리한다음 비활성화 
+    /// </summary>
+    /// <param name="pool"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
+    private GameObject CreateNewObject(Pool pool, Transform parent)
     {
-        if (!poolDictionary.ContainsKey(tag)) // 이름이 딕셔너리에 없으면 오류 구문 실행
+        GameObject obj = Instantiate(pool.prefab);
+        obj.name = pool.prefab.name;
+        obj.transform.SetParent(parent);
+        obj.SetActive(false);
+        return obj;
+    }
+
+    /// <summary>
+    /// 오브젝트 스폰 함수 태그와 장소를 받는다.
+    /// </summary>
+    /// <param name="tag"></param>
+    /// <param name="spawnPoint"></param>
+    /// <returns></returns>
+    public GameObject SpawnFromPool(string tag, Transform spawnPoint)
+    {
+        if (!poolDictionary.ContainsKey(tag)) //해당 이름의 풀을 가지고 있는지 체크 용도
         {
             Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
             return null;
         }
-        if (poolDictionary[tag] == null) // 이름은 있는데 안에 풀링 오브젝트가 없을시 리턴
-        {
-            return null;
-        }
-        GameObject objectToSpawn = poolDictionary[tag].Dequeue(); // 앞에서 널 체크 이후 있기에 큐에서 꺼내 쓰기
-        objectToSpawn.SetActive(false); // 꺼내고 활성화
-        objectToSpawn.SetActive(true); // 꺼내고 활성화
-        objectToSpawn.transform.position = spawnPoint.transform.position;
-        poolDictionary[tag].Enqueue(objectToSpawn); // 활성화후 정보를 다시 큐에 저장
 
-        return objectToSpawn; // 그리고 그 옵젝을 리턴
+        if (poolDictionary[tag].Count == 0) // 만약 해당 풀의 사이즈만큼의 큐를 다 뽑아썼다면 풀사이즈를 늘리면서 생성
+        {
+            Pool pool = pools.Find(p => p.prefab.name == tag); // find로 리스트에서 해당 풀을 찾아내기 없으면 Null을 뱉지만 이미 전에 Null 체크를 함
+            if (pool != null)
+            {
+                poolDictionary[tag].Enqueue(CreateNewObject(pool, GameObject.Find("@" + pool.prefab.name).transform));
+            }
+        }
+
+        GameObject objectToSpawn = poolDictionary[tag].Dequeue();
+        objectToSpawn.SetActive(true);
+        objectToSpawn.transform.position = spawnPoint.position;
+        objectToSpawn.transform.rotation = spawnPoint.rotation;
+
+        return objectToSpawn;
     }
 
-    //public void DeSpawnToPool()
-    //{
+    public void DeSpawnToPool(GameObject obj)
+    {
+        obj.SetActive(false);
+        obj.transform.position = Vector3.zero;
 
-    //}
-
-
-
+        string tag = obj.name;
+        if (poolDictionary.ContainsKey(tag))
+        {
+            poolDictionary[tag].Enqueue(obj);
+        }
+        else
+        {
+            Debug.LogWarning("No pool exists for object: " + tag);
+            Destroy(obj);
+        }
+    }
 }

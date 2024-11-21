@@ -6,6 +6,11 @@ public class Gun : MonoBehaviour,IUpdatable
 {
     public GameObject BulletPrefab;
 
+    private void Awake()
+    {
+        Init();
+    }
+
     private void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
@@ -24,12 +29,19 @@ public class Gun : MonoBehaviour,IUpdatable
         }
     }
 
+    void Init()
+    {
+        if(BulletPrefab == null)
+        {
+            Debug.LogError("총알 프리팹이 적용되지 않았습니다.");
+        }
+    }
     public void Shooting()
     {
         Debug.Log("발사");
 
         
-        GameObject bullet = ObjectPoolManager.Instance.SpawnFromPool(BulletPrefab.name, gameObject);
+        GameObject bullet = ObjectPoolManager.Instance.SpawnFromPool(BulletPrefab.name, gameObject.transform);
         bullet.transform.rotation = transform.rotation;
     }
 
