@@ -62,7 +62,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     /// <param name="tag"></param>
     /// <param name="spawnPoint"></param>
     /// <returns></returns>
-    public GameObject SpawnFromPool(string tag, Transform spawnPoint)
+    public GameObject SpawnFromPool(string tag, Vector3 spawnPoint)
     {
         if (!poolDictionary.ContainsKey(tag)) //해당 이름의 풀을 가지고 있는지 체크 용도
         {
@@ -81,26 +81,30 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
 
         GameObject objectToSpawn = poolDictionary[tag].Dequeue();
         objectToSpawn.SetActive(true);
-        objectToSpawn.transform.position = spawnPoint.position;
-        objectToSpawn.transform.rotation = spawnPoint.rotation;
+        objectToSpawn.transform.position = spawnPoint;
 
         return objectToSpawn;
     }
 
+    // 디스폰 함수 리스폰을 했으니 어디선가 이걸로 프리팹 비활성화를 해줘야함
     public void DeSpawnToPool(GameObject obj)
     {
-        obj.SetActive(false);
-        obj.transform.position = Vector3.zero;
-
-        string tag = obj.name;
-        if (poolDictionary.ContainsKey(tag))
+        obj.transform.position = Vector3.zero; // 위치값 초기화
+        
+        
+        string tag = obj.name; // 오브젝트 이름 TAG 저장
+        if (poolDictionary.ContainsKey(tag)) // 풀 딕셔너리에 있으면 
         {
-            poolDictionary[tag].Enqueue(obj);
+            poolDictionary[tag].Enqueue(obj); // 오브젝트 다시 저장
+            obj.SetActive(false); // 비활성화 
         }
         else
         {
+            // 잘못된 오브젝트일 경우 로그를 남기고 삭제
             Debug.LogWarning("No pool exists for object: " + tag);
             Destroy(obj);
         }
+
+       
     }
 }

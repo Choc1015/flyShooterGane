@@ -4,12 +4,16 @@ using Unity.VisualScripting;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-[RequireComponent(typeof(PlayerInfo), typeof(PlayerInput),typeof(PlayerMovement))]
+// 이 스크립트 사용시 무조건 이것들이 사용되어야 함을 명시
+[RequireComponent(typeof(StatInfo), typeof(PlayerInput),typeof(PlayerMovement))]
 public class PlayerController : MonoBehaviour, IUpdatable
 {
-    private PlayerMovement _movement;
-    private PlayerInfo _info;
-    private PlayerInput _input;
+    // 움직임 클래스
+    private PlayerMovement movement;
+    // 정보 클래스
+    private StatInfo playerInfo;
+    // 플레이 INPUT 클래스
+    private PlayerInput input;
     private void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
@@ -22,22 +26,25 @@ public class PlayerController : MonoBehaviour, IUpdatable
 
     private void Awake()
     {
+        // 초기 함수
         Init();
     }
 
     private void Init()
     {
-        _movement = GetComponent<PlayerMovement>();
-        _info = GetComponent<PlayerInfo>();
-        _input = GetComponent<PlayerInput>();
+        // 각각의 클래스를 오브젝에서 찾아 넣어줌
+        movement = GetComponent<PlayerMovement>();
+        playerInfo = GetComponent<StatInfo>();
+        input = GetComponent<PlayerInput>();
     }
 
     public void OnUpdate()
     {
         
-        if (Input.anyKey)
+        if (Input.anyKey) // 아무키를 눌렀을시
         {
-            _movement.TransMove(_info.speed, _input.AxisInput());
+            // 움직임 함수와, 스피트 정보, 인풋 클래스를 가져옴
+            movement.TransMove(playerInfo.speed, input.AxisInput());
         }
     }
 
