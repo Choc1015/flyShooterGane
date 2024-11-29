@@ -64,7 +64,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     /// <returns></returns>
     public GameObject SpawnFromPool(string tag, Vector3 spawnPoint)
     {
-        if (!poolDictionary.ContainsKey(tag)) //해당 이름의 풀을 가지고 있는지 체크 용도
+        if (!poolDictionary.ContainsKey(tag)) // 해당 이름의 풀을 가지고 있는지 체크 용도
         {
             Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
             return null;

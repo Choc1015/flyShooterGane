@@ -38,6 +38,16 @@ public class PlayerController : MonoBehaviour, IUpdatable
         input = GetComponent<PlayerInput>();
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log("ww");        
+
+        if (collision.gameObject.CompareTag("EnemyBullet"))
+        {
+            ObjectPoolManager.Instance.DeSpawnToPool(collision.gameObject);
+        }
+    }
+
     public void OnUpdate()
     {
         

@@ -2,6 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ETarget
+{
+    Player,
+    Enemy
+}
+
 public abstract class Bullet : MonoBehaviour, IUpdatable
 {
     // 총알 속도
@@ -10,24 +16,18 @@ public abstract class Bullet : MonoBehaviour, IUpdatable
     private int bulletDamage = 1;
     
     // 범위 값
-    const int endX = 6;
-    const int endY = 10;
+    const int endX = 11;
+    const int endY = 20;
 
-    public void OnEnable()
+    protected void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
+        AddAbility();
     }
 
     protected void OnDisable()
     {
         UpdateManager.Instance?.Unregister(this);
-    }
-    private void Start()
-    {
-
-
-        // 코루틴으로 추가능력을 확장할 시
-        AddAbility(); 
     }
 
     public void OnUpdate()
@@ -38,11 +38,7 @@ public abstract class Bullet : MonoBehaviour, IUpdatable
     }
 
     // 코루틴으로 추가능력을 확장할 시
-    public virtual void AddAbility()
-    {
-
-    }
-
+    public virtual void AddAbility() { }
     // 총알 움직임 로직
     public void ShootBullet()
     {
