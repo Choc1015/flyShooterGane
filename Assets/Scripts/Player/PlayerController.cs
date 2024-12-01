@@ -8,19 +8,28 @@ using UnityEngine;
 [RequireComponent(typeof(StatInfo), typeof(PlayerInput),typeof(PlayerMovement))]
 public class PlayerController : MonoBehaviour, IUpdatable
 {
+    public bool IsAlive { get; private set; } = true;
+
     // 움직임 클래스
     private PlayerMovement movement;
     // 정보 클래스
     private StatInfo playerInfo;
     // 플레이 INPUT 클래스
     private PlayerInput input;
+    // 처음 위치
+    private Vector2 InitPosition;
+
     private void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
+        IsAlive = true;
+        Init();
     }
 
     private void OnDisable()
     {
+        IsAlive = false;
+        transform.position = InitPosition;
         UpdateManager.Instance?.Unregister(this);
     }
 
@@ -36,6 +45,8 @@ public class PlayerController : MonoBehaviour, IUpdatable
         movement = GetComponent<PlayerMovement>();
         playerInfo = GetComponent<StatInfo>();
         input = GetComponent<PlayerInput>();
+        InitPosition = transform.position;
+        GameManager.Instance.playerHp = playerInfo.health;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -44,13 +55,18 @@ public class PlayerController : MonoBehaviour, IUpdatable
 
         if (collision.gameObject.CompareTag("EnemyBullet"))
         {
+            OnDamaged(collision.gameObject.GetComponent<Bullet>().GetDamage());
+            GameManager.Instance.playerHp = playerInfo.health;
             ObjectPoolManager.Instance.DeSpawnToPool(collision.gameObject);
         }
     }
 
     public void OnUpdate()
     {
-        
+        if (GameManager.Instance.IsPause == false)
+            return;
+
+
         if (Input.anyKey) // 아무키를 눌렀을시
         {
             // 움직임 함수와, 스피트 정보, 인풋 클래스를 가져옴
@@ -58,6 +74,20 @@ public class PlayerController : MonoBehaviour, IUpdatable
         }
     }
 
-   
-        
+    private void OnDamaged(int DamageValue)
+    {
+        playerInfo.health -= DamageValue;
+
+        Die();
+
+    }
+
+    private void Die()
+    {
+        if (playerInfo.health == 0)
+        {
+            IsAlive = false;
+        }
+    }
+
 }

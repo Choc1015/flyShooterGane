@@ -42,6 +42,9 @@ public class Gun : MonoBehaviour, IUpdatable
 
     public void OnUpdate()
     {
+        if (GameManager.Instance.IsPause == false)
+            return;
+
         if (Input.GetKeyDown(KeyCode.Space) && Owner == EWeaponOwner.Player)
         {
             // 발사 함수

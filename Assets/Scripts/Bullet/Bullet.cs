@@ -14,18 +14,19 @@ public abstract class Bullet : MonoBehaviour, IUpdatable
     [SerializeField] private float bulletSpeed;
     // 총알 데미지
     private int bulletDamage = 1;
-    
+    private float bulletDurationTime = 5;
     // 범위 값
     const int endX = 11;
     const int endY = 20;
 
-    protected void OnEnable()
+    private void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
         AddAbility();
+        StartCoroutine(ClearBullet());
     }
 
-    protected void OnDisable()
+    private void OnDisable()
     {
         UpdateManager.Instance?.Unregister(this);
     }
@@ -70,6 +71,14 @@ public abstract class Bullet : MonoBehaviour, IUpdatable
     public int GetDamage()
     {
         return bulletDamage;
+    }
+
+    IEnumerator ClearBullet()
+    {
+        
+        yield return new WaitForSeconds(bulletDurationTime);
+        ObjectPoolManager.Instance.DeSpawnToPool(gameObject);
+        yield return null;
     }
 
 }

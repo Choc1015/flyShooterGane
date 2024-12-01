@@ -4,7 +4,19 @@ using UnityEngine;
 
 public class PlayingState : State
 {
-    public override void Enter() => Debug.Log("플레이에 진입");
-    public override void Execute() => Debug.Log("플레이중");
-    public override void Exit() => Debug.Log("플레이에서 나감");
+    public override void Enter()
+    {
+        Debug.Log("플레이에 진입");
+        Time.timeScale = 1f;
+        GameManager.Instance.IsPause = true;
+        GameManager.Instance.SpawnEnemy();
+    }
+    public override void Execute() 
+    {
+       
+    }
+    public override void Exit()
+    {
+        GameManager.Instance.Stage++;
+    }
 }

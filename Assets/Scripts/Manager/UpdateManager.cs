@@ -21,6 +21,7 @@ public class UpdateManager : Singleton<UpdateManager>
     // Update 등록 메서드
     public void Register(IUpdatable updatable)
     {
+        OnUpdateEvent -= updatable.OnUpdate;
         OnUpdateEvent += updatable.OnUpdate;
     }
 

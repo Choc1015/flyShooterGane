@@ -11,7 +11,8 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     }
 
     public List<Pool> pools; // 리스트에 여러 풀들을 관리한다. 
-    public Dictionary<string, Queue<GameObject>> poolDictionary; // 풀을 딕셔너리에서 생성한다. 
+    private Dictionary<string, Queue<GameObject>> poolDictionary; // 풀을 딕셔너리에서 생성한다. 
+    private Dictionary<string, HashSet<GameObject>> activeObjects; // 활성화된 오브젝트 관리
 
     private void Awake()
     {
@@ -26,10 +27,13 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     private void Initialize()
     {
         poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        activeObjects = new Dictionary<string, HashSet<GameObject>>();
 
         foreach (Pool pool in pools)
         {
             Queue<GameObject> objectPool = new Queue<GameObject>();
+            HashSet<GameObject> activeSet = new HashSet<GameObject>();
+
             GameObject parentObject = new GameObject("@" + pool.prefab.name);
 
             for (int i = 0; i < pool.size; i++)
@@ -38,8 +42,10 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
             }
 
             poolDictionary.Add(pool.prefab.name, objectPool);
+            activeObjects.Add(pool.prefab.name, activeSet);
         }
     }
+
 
     /// <summary>
     /// 오브젝트 생성 함수 풀과 부모 오브젝트를 받아서 부모 오브젝트는 그냥 빈 폴더이고 생성해서 부모 오브젝에 정리한다음 비활성화 
@@ -52,6 +58,7 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         GameObject obj = Instantiate(pool.prefab);
         obj.name = pool.prefab.name;
         obj.transform.SetParent(parent);
+        parent.transform.SetParent(transform);
         obj.SetActive(false);
         return obj;
     }
@@ -64,15 +71,15 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
     /// <returns></returns>
     public GameObject SpawnFromPool(string tag, Vector3 spawnPoint)
     {
-        if (!poolDictionary.ContainsKey(tag)) // 해당 이름의 풀을 가지고 있는지 체크 용도
+        if (!poolDictionary.ContainsKey(tag))
         {
             Debug.LogWarning("Pool with tag " + tag + " doesn't exist.");
             return null;
         }
 
-        if (poolDictionary[tag].Count == 0) // 만약 해당 풀의 사이즈만큼의 큐를 다 뽑아썼다면 풀사이즈를 늘리면서 생성
+        if (poolDictionary[tag].Count == 0)
         {
-            Pool pool = pools.Find(p => p.prefab.name == tag); // find로 리스트에서 해당 풀을 찾아내기 없으면 Null을 뱉지만 이미 전에 Null 체크를 함
+            Pool pool = pools.Find(p => p.prefab.name == tag);
             if (pool != null)
             {
                 poolDictionary[tag].Enqueue(CreateNewObject(pool, GameObject.Find("@" + pool.prefab.name).transform));
@@ -83,28 +90,51 @@ public class ObjectPoolManager : Singleton<ObjectPoolManager>
         objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = spawnPoint;
 
+        activeObjects[tag].Add(objectToSpawn); // 활성화된 오브젝트로 등록
         return objectToSpawn;
     }
+
 
     // 디스폰 함수 리스폰을 했으니 어디선가 이걸로 프리팹 비활성화를 해줘야함
     public void DeSpawnToPool(GameObject obj)
     {
-        obj.transform.position = Vector3.zero; // 위치값 초기화
-        
-        
-        string tag = obj.name; // 오브젝트 이름 TAG 저장
-        if (poolDictionary.ContainsKey(tag)) // 풀 딕셔너리에 있으면 
+        obj.transform.position = Vector3.zero;
+
+        string tag = obj.name;
+        if (poolDictionary.ContainsKey(tag))
         {
-            poolDictionary[tag].Enqueue(obj); // 오브젝트 다시 저장
-            obj.SetActive(false); // 비활성화 
+            poolDictionary[tag].Enqueue(obj);
+            activeObjects[tag].Remove(obj); // 활성화된 오브젝트에서 제거
+            obj.SetActive(false);
         }
         else
         {
-            // 잘못된 오브젝트일 경우 로그를 남기고 삭제
             Debug.LogWarning("No pool exists for object: " + tag);
             Destroy(obj);
         }
-
-       
     }
+
+
+    /// <summary>
+    /// 모든 활성화된 프리팹을 디스폰하여 풀로 반환
+    /// </summary>
+    public void DespawnAll()
+    {
+        foreach (var pair in activeObjects)
+        {
+            string tag = pair.Key;
+            HashSet<GameObject> activeSet = pair.Value;
+
+            // 활성화된 모든 오브젝트를 디스폰
+            foreach (var obj in new List<GameObject>(activeSet)) // 리스트로 복사 후 처리
+            {
+                DeSpawnToPool(obj);
+            }
+        }
+
+        Debug.Log("모든 활성화된 오브젝트가 디스폰되었습니다.");
+    }
+
+
+
 }

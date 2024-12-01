@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FollowTargetBullet : Bullet
@@ -17,31 +16,97 @@ public class FollowTargetBullet : Bullet
         switch (targetType)
         {
             case ETarget.Player:
-                target = FindObjectOfType<PlayerController>().gameObject;
+                var player = FindObjectOfType<PlayerController>();
+                target = player != null ? player.gameObject : null;
+                if (player == null)
+                {
+                    Debug.LogWarning("플레이어가 존재하지 않습니다!");
+                }
                 break;
+
             case ETarget.Enemy:
-                target = FindObjectOfType<EnemyController>().gameObject;
+                var enemy = FindObjectOfType<EnemyController>();
+                target = enemy != null ? enemy.gameObject : null;
+                if (enemy == null)
+                {
+                    Debug.LogWarning("적이 존재하지 않습니다!");
+                }
                 break;
+        }
+
+        if (target == null)
+        {
+            Debug.Log("타겟을 찾을 수 없습니다!");
         }
     }
 
     public override void AddAbility()
     {
+        InitTarget();
         StartCoroutine(FollowTarget());
     }
 
     IEnumerator FollowTarget()
     {
         yield return new WaitForSeconds(1);
+
         while (true)
         {
+            switch (targetType)
+            {
+                case ETarget.Player:
+                    if (target == null)
+                        yield break;
+                    break;
+                case ETarget.Enemy:
+                    if (target == null || !target.GetComponent<EnemyController>().IsAlive)
+                    {
+                        // 새로운 타겟 검색
+                        target = FindNewTarget();
+
+                        if (target == null)
+                        {
+                            Debug.Log("타겟이 없음. 총알 비활성화 또는 파괴.");
+                            ObjectPoolManager.Instance.DeSpawnToPool(gameObject); // 총알 비활성화
+                            yield break;
+                        }
+                    }
+                    break;
+            }
+            // 타겟이 유효한 경우 회전 및 이동 처리
             LookAt2D(target.transform);
             yield return null;
         }
     }
 
+    private GameObject FindNewTarget()
+    {
+        var enemies = FindObjectsOfType<EnemyController>();
+        float closestDistance = Mathf.Infinity;
+        GameObject newTarget = null;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy.IsAlive) // 살아있는 적만 고려
+            {
+                float distance = Vector3.Distance(transform.position, enemy.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    newTarget = enemy.gameObject;
+                }
+            }
+        }
+
+        return newTarget;
+    }
+
+
     void LookAt2D(Transform targetTransform)
     {
+        if (targetTransform == null)
+            return;
+
         // 대상 방향 계산
         Vector3 direction = targetTransform.position - transform.position;
 

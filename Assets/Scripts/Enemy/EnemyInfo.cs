@@ -5,6 +5,5 @@ using UnityEngine;
 public class EnemyInfo : StatInfo
 {
     public float zigzagSpeed;
-    public float zigzagAmplitude;
     public float range;
 }
