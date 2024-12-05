@@ -74,7 +74,6 @@ public class Gun : MonoBehaviour, IUpdatable
 
     public void Shooting()
     {
-        Debug.Log("발사");
         // 오브젝트 풀링 클래스에서 풀로 생성 * 추후 디스폰 함수 넣어야 함.
         GameObject bullet = ObjectPoolManager.Instance.SpawnFromPool(BulletPrefab.name, transform.position);
         // 총알의 회전 값을 총의 회전값에 맞추기

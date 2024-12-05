@@ -51,8 +51,6 @@ public class PlayerController : MonoBehaviour, IUpdatable
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log("ww");        
-
         if (collision.gameObject.CompareTag("EnemyBullet"))
         {
             OnDamaged(collision.gameObject.GetComponent<Bullet>().GetDamage());

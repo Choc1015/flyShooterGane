@@ -9,6 +9,6 @@ public class GameOverState : State
         GameManager.Instance.PopupGameOver();
         Time.timeScale = 0f;
     }
-    public override void Execute() => Debug.Log("Á¾·áÁß");
-    public override void Exit() => GameManager.Instance.Init();
+    public override void Execute() { }
+    public override void Exit() { GameManager.Instance.Init(); }
 }
