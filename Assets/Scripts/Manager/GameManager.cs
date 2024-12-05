@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 using TMPro;
 using UnityEngine;
 
-public class GameManager : Singleton<GameManager>, IUpdatable
+public class GameManager : Singleton<GameManager>
 {
     public GameObject[] Player;
     public GameObject[] Enemy;
@@ -27,17 +27,7 @@ public class GameManager : Singleton<GameManager>, IUpdatable
     Vector2 spawnValue;
 
     private StateMachine stateMachine;
-
-
-    private void OnEnable()
-    {
-        UpdateManager.Instance?.Register(this);
-    }
-
-    private void OnDisable()
-    {
-        UpdateManager.Instance?.Unregister(this);
-    }
+    private int enemyIndex = 0;
 
     private void Awake()
     {
@@ -47,31 +37,32 @@ public class GameManager : Singleton<GameManager>, IUpdatable
         stateMachine.ChangeState(new StartState());
     }
 
-    public void OnUpdate()
+    public void Init()
+    {
+        EnemyCount = 3;
+        Stage = 1;
+        playerHp = 100;
+        enemyIndex = 0;
+        ObjectPoolManager.Instance.DespawnAll();
+        
+    }
+
+    public void UpdateGameState()
     {
         if (EnemyCount == 0)
         {
             stateMachine.ChangeState(new PlayingState());
         }
 
-        if(playerHp == 0)
+        if (playerHp <= 0)
         {
             stateMachine.ChangeState(new GameOverState());
-            playerHp = -1;
         }
 
-        if(Stage == 40)
+        if (Stage == 40)
         {
             stateMachine.ChangeState(new ClearState());
         }
-    }
-
-    public void Init()
-    {
-        EnemyCount = 3;
-        Stage = 1;
-        ObjectPoolManager.Instance.DespawnAll();
-        
     }
 
     public void StartButton()
@@ -111,7 +102,9 @@ public class GameManager : Singleton<GameManager>, IUpdatable
     {
         GameObject beforePlayer = FindObjectOfType<PlayerController>().gameObject;
         if (beforePlayer != null)
-        beforePlayer.gameObject.SetActive(false);
+        {
+            beforePlayer.gameObject.SetActive(false);
+        }
         Player[Dropdown.value].SetActive(true);
     }
 
@@ -120,8 +113,13 @@ public class GameManager : Singleton<GameManager>, IUpdatable
         EnemyCount = 3;
         for (int i = 0; i < EnemyCount; i++)
         {
-            int rndEnemyIndex = Random.Range(0, Enemy.Length - 1);
-            ObjectPoolManager.Instance.SpawnFromPool(Enemy[rndEnemyIndex].name, RandomSpawn());
+            ObjectPoolManager.Instance.SpawnFromPool(Enemy[enemyIndex].name, RandomSpawn());
+            enemyIndex++;
+
+            if(enemyIndex == Enemy.Length - 1)
+            {
+                enemyIndex = 0;
+            }
         }
     }
 

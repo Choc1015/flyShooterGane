@@ -18,7 +18,8 @@ public class PlayerController : MonoBehaviour, IUpdatable
     private PlayerInput input;
     // 처음 위치
     private Vector2 InitPosition;
-
+    // 처음 생명력
+    private int initHealth; 
     private void OnEnable()
     {
         UpdateManager.Instance?.Register(this);
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour, IUpdatable
     {
         IsAlive = false;
         transform.position = InitPosition;
+        playerInfo.health = initHealth;
         UpdateManager.Instance?.Unregister(this);
     }
 
@@ -46,6 +48,7 @@ public class PlayerController : MonoBehaviour, IUpdatable
         playerInfo = GetComponent<StatInfo>();
         input = GetComponent<PlayerInput>();
         InitPosition = transform.position;
+        initHealth = playerInfo.health;
         GameManager.Instance.playerHp = playerInfo.health;
     }
 
