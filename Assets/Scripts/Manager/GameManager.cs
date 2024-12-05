@@ -116,7 +116,7 @@ public class GameManager : Singleton<GameManager>
             ObjectPoolManager.Instance.SpawnFromPool(Enemy[enemyIndex].name, RandomSpawn());
             enemyIndex++;
 
-            if(enemyIndex == Enemy.Length - 1)
+            if(enemyIndex > Enemy.Length - 1)
             {
                 enemyIndex = 0;
             }
